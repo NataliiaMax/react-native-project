@@ -34,8 +34,10 @@ export default function RegistrationScreen() {
           style={styles.input}
           placeholder="Пароль Показать"
           value={value}
-          onChangeText={inputHandler}
-        />
+                  onChangeText={inputHandler}
+                  secureTextEntry={true}
+              />
+              <Button title='Зарегистрироваться'></Button>
       </ImageBackground>
     </View>
   );
