@@ -4,7 +4,7 @@ import {
   Text,
   View,
   TextInput,
-    TouchableOpacity,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   Keyboard,
@@ -38,7 +38,7 @@ export default function RegistrationScreen() {
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    console.log(state);
+    // console.log(state);
     setstate(initialState);
   };
 
@@ -72,8 +72,6 @@ export default function RegistrationScreen() {
               setState((prevState) => ({ ...prevState, login: value }))
             }
           />
-        </View>
-        <View>
           <Text style={styles.inputTitle}>Email address</Text>
           <TextInput
             style={styles.input}
