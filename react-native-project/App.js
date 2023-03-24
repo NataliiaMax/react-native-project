@@ -1,29 +1,35 @@
-import React, { useCallback } from "react";
+import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import { useFonts } from "expo-font";
-import * as SplashScreen from 'expo-splash-screen'
-
+import { StyleSheet,  View } from "react-native";
+import * as Font from "expo-font";
+import { AppLoading } from "expo";
 import { RegistrationScreen } from "./Screens/RegistrationScreen";
 import { LoginScreen } from "./Screens/LoginScreen";
 
-SplashScreen.preventAutoHideAsync()
+const loadApplication = async () => {
+  await Font.loadAsync({
+    "DMMono-Regular": require("./assets/fonts/DMMono-Regular.ttf"),
+  });
+};
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
-    "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
-    "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
-  });
+    const [iasReady, setIasReady] = useState(false);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+  const keyboardHide = () => {
+    setIsShowKeyboard(false);
+    Keyboard.dismiss();
+    console.log(state);
+    setstate(initialState);
+  };
 
-  if (!fontsLoaded) {
-    return null;
+  if (!iasReady) {
+    return (
+      <AppLoading
+        startAsync={loadApplication}
+        onFinish={() => setIasReady(true)}
+        onError={console.warn}
+      />
+    );
   }
   
   return (
