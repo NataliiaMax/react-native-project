@@ -1,26 +1,20 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet,  View } from "react-native";
+import { StyleSheet, View, TouchableWithoutFeedback, ImageBackground } from "react-native";
 import * as Font from "expo-font";
 import { AppLoading } from "expo";
-import { RegistrationScreen } from "./Screens/RegistrationScreen";
-import { LoginScreen } from "./Screens/LoginScreen";
+import RegistrationScreen from "./Screens/RegistrationScreen";
+import LoginScreen from "./Screens/LoginScreen";
 
 const loadApplication = async () => {
   await Font.loadAsync({
-    "DMMono-Regular": require("./assets/fonts/DMMono-Regular.ttf"),
+    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
+    "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
   });
 };
 
 export default function App() {
-    const [iasReady, setIasReady] = useState(false);
-
-  const keyboardHide = () => {
-    setIsShowKeyboard(false);
-    Keyboard.dismiss();
-    console.log(state);
-    setstate(initialState);
-  };
+  const [iasReady, setIasReady] = useState(false);
 
   if (!iasReady) {
     return (
@@ -31,13 +25,13 @@ export default function App() {
       />
     );
   }
-  
+
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container} onLayout={onLayoutRootView}>
         <ImageBackground
           style={styles.image}
-          source={require("../../assets/image/registrationScreenPhoto.jpg")}
+          source={require("./assets/image/registrationScreenPhoto.jpg")}
         >
           <RegistrationScreen />
           <LoginScreen />
