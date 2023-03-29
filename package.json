@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "babel-preset-react-native": "^2.1.0"
+    "babel-preset-react-native": "^2.1.0",
+    "expo-splash-screen": "^0.18.1"
   }
 }
