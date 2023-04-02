@@ -18,7 +18,7 @@ const initialState = {
   password: "",
 };
 
-export default function LoginScreen() {
+export default function LoginScreen({navigation}) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
 
@@ -49,7 +49,7 @@ export default function LoginScreen() {
       <View style={styles.container}>
         <ImageBackground
           style={styles.image}
-          source={require("../assets/image/registrationScreenPhoto.jpg")}
+          source={require("../../assets/image/registrationScreenPhoto.jpg")}
         ></ImageBackground>
         <KeyboardAvoidingView
           behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -102,6 +102,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               activeOpacity={0.8}
               style={{ alignSelf: "center" }}
+              onPress={() => navigation.navigate("Register")}
             >
               <Text>
                 Don't have an account?{""}

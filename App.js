@@ -1,18 +1,16 @@
 import React, { useCallback } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, TouchableWithoutFeedback } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import RegistrationScreen from "./Screens/auth/RegistrationScreen";
-import LoginScreen from "./Screens/auth/LoginScreen";
-
-// SplashScreen.preventAutoHideAsync();
+import { NavigationContainer } from "@react-navigation/native";
+import { useRoute } from "./router";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
     "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
     "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
   });
+
+  const routing = useRoute(true);
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
@@ -25,19 +23,8 @@ export default function App() {
   }
 
   return (
-    <TouchableWithoutFeedback>
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        <RegistrationScreen />
-        <LoginScreen />
-        <StatusBar style="auto" />
-      </View>
-    </TouchableWithoutFeedback>
+    <NavigationContainer onLayout={onLayoutRootView}>
+      {routing}
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});
