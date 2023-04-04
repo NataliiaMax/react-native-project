@@ -2,7 +2,7 @@ import React from "react";
 import MapView, { Marker } from "react-native-maps";
 import { StyleSheet, View } from "react-native";
 
-const MapScreen = ({ route }) => {
+export default function MapScreen({ route }) {
   const { latitude, longitude } = route.params.location;
 
   return (
@@ -20,7 +20,7 @@ const MapScreen = ({ route }) => {
       </MapView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -31,5 +31,3 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
-
-export default MapScreen;
