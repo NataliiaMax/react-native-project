@@ -1,3 +1,5 @@
+import { useEffect, useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Text,
   View,
@@ -17,8 +19,21 @@ import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function ProfileScreen({ route, navigation }) {
+import { profileUpdateAvatar } from "../../redux/auth/authOperations";
+import { db } from "../../firebase/config";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+import { getStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
+
+const ProfileScreen = ({ route, navigation }) => {
   const [userPosts, setUserPosts] = useState([]);
+  const [removedPost, setRemovedPost] = useState("");
   const [like, setLike] = useState(0);
   const [comment, setComment] = useState(0);
   const cameraRef = useRef();
@@ -27,6 +42,9 @@ export default function ProfileScreen({ route, navigation }) {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
   const [isPreview, setIsPreview] = useState(false);
+
+  const dispatch = useDispatch();
+  const { userId, avatar } = useSelector((state) => state.auth);
 
   useEffect(() => {
     (async () => {
@@ -74,6 +92,45 @@ export default function ProfileScreen({ route, navigation }) {
       setMakePhoto(null);
     }
   };
+  const uploadPhotoAvatar = async () => {
+    try {
+      const storage = getStorage();
+      const response = await fetch(avatarPhoto);
+      const file = await response.blob();
+      const uniquePostId = Date.now().toString();
+      const data = await ref(storage, `avatars/${uniquePostId}`);
+      const uploadPhoto = await uploadBytes(data, file);
+      const newAvatar = await getDownloadURL(data);
+      dispatch(profileUpdateAvatar({ avatar: newAvatar }));
+      setAvatarPhoto(null);
+      setMakePhoto(null);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const getUserPosts = async () => {
+    try {
+      const q = query(collection(db, "posts"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      const allPosts = querySnapshot.docs.map((post) => ({
+        ...post.data(),
+        id: post.id,
+      }));
+      setUserPosts(allPosts);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  const removePost = async (id) => {
+    await deleteDoc(doc(db, "posts", id));
+    setRemovedPost(id);
+  };
+
+  useEffect(() => {
+    getUserPosts();
+  }, [removedPost]);
 
   const onPress = () => {
     setLike(like + 1);
@@ -87,11 +144,14 @@ export default function ProfileScreen({ route, navigation }) {
     <View style={styles.container}>
       <ImageBackground
         style={styles.image}
-        source={require("../../assets/image/registrationScreenPhoto.jpg")}
+        source={require("../../assets/image/registrationScreen.jpg")}
       >
         <View>
           {!makePhoto && (
-            <Image style={styles.imageAvatar} source={{ uri: avatar }} />
+            <Image
+              style={styles.imageAvatar}
+              source={{ uri: avatar }}
+                          />
           )}
           {makePhoto === "camera" && (
             <Camera style={styles.camera} ref={cameraRef} type={cameraType}>
@@ -110,7 +170,7 @@ export default function ProfileScreen({ route, navigation }) {
                 source={{ uri: avatarPhoto }}
                 style={{ width: 120, height: 120 }}
               />
-              <TouchableOpacity>
+              <TouchableOpacity onPress={uploadPhotoAvatar} title="UploadPhoto">
                 <FontAwesome name="cloud-upload" size={24} color="orange" />
               </TouchableOpacity>
             </View>
@@ -138,6 +198,7 @@ export default function ProfileScreen({ route, navigation }) {
                 </View>
                 <TouchableOpacity
                   activeOpacity={0.8}
+                  onPress={() => removePost(item.id)}
                   style={styles.buttonContainerDelete}
                 >
                   <AntDesign name="delete" size={24} color="grey" />
@@ -176,7 +237,7 @@ export default function ProfileScreen({ route, navigation }) {
                     style={{ marginRight: 5 }}
                     onPress={() =>
                       navigation.navigate("Map", {
-                        location: item.location,
+                                                location: item.location,
                       })
                     }
                   >
@@ -199,7 +260,7 @@ export default function ProfileScreen({ route, navigation }) {
       </ImageBackground>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -302,3 +363,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 });
+
+export default ProfileScreen;

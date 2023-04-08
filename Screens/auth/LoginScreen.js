@@ -1,115 +1,115 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
+  TextInput,
   Text,
   View,
-  ImageBackground,
-  TextInput,
+  KeyboardAvoidingView,
   TouchableOpacity,
   Platform,
-  KeyboardAvoidingView,
   Keyboard,
-  TouchableWithoutFeedback,
-  Dimensions,
+  ImageBackground,
 } from "react-native";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { useDispatch } from "react-redux";
+import { authSingInUser } from "../../redux/auth/authOperations";
 
 const initialState = {
   email: "",
   password: "",
 };
 
-export default function LoginScreen({navigation}) {
+export default function LoginScreen({ navigation }) {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [state, setState] = useState(initialState);
 
-  const [dimensions, setDimensions] = useState(
-    Dimensions.get("window").width - 20 * 2
-  );
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    const onChange = () => {
-      const width = Dimensions.get("window").width - 20 * 2;
-      setDimensions(width);
-    };
-    Dimensions.addEventListener("change", onChange);
-    return () => {
-      Dimensions.removeEventListener("change", onChange);
-    };
-  }, []);
+  const handleSubmit = () => {
+    setIsShowKeyboard(false);
+    Keyboard.dismiss();
+    setState(initialState);
+    console.log(isShowKeyboard);
+    dispatch(authSingInUser(state));
+    navigation.navigate("Home", { authorize: true });
+  };
 
   const keyboardHide = () => {
     setIsShowKeyboard(false);
     Keyboard.dismiss();
-    console.log(state);
-    setState(initialState);
   };
 
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
-        <ImageBackground
-          style={styles.image}
-          source={require("../../assets/image/registrationScreenPhoto.jpg")}
-        ></ImageBackground>
         <KeyboardAvoidingView
-          behavior={Platform.OS == "ios" ? "padding" : "height"}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View
-            style={{
-              ...styles.form,
-              marginBottom: isShowKeyboard ? 32 : 100,
-              width: dimensions,
-            }}
-            onSubmit={(values) => {
-              console.log(values);
-            }}
+          <ImageBackground
+            style={styles.image}
+            source={require("../../assets/image/registrationScreen.jpg")}
           >
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>Sign up</Text>
-            </View>
-            <View>
-              <Text style={styles.inputTitle}>Email address</Text>
-              <TextInput
-                style={styles.input}
-                textAlign={"center"}
-                onFocus={() => setIsShowKeyboard(true)}
-                value={state.email}
-                onChangeText={(value) =>
-                  setState((prevState) => ({ ...prevState, email: value }))
-                }
-              />
-            </View>
-            <View style={{ marginTop: 20 }}>
-              <Text style={styles.inputTitle}>Password</Text>
-              <TextInput
-                style={styles.input}
-                textAlign={"center"}
-                secureTextEntry={true}
-                onFocus={() => setIsShowKeyboard(true)}
-                value={state.password}
-                onChangeText={(value) =>
-                  setState((prevState) => ({ ...prevState, password: value }))
-                }
-              />
-            </View>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.btn}
-              onPress={keyboardHide}
+            <View
+              style={{
+                ...styles.form,
+                marginBottom: isShowKeyboard ? -32 : -90,
+              }}
+              onSubmit={(values) => {
+                console.log(values);
+              }}
             >
-              <Text style={styles.btnTitle}>Sign in</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={{ alignSelf: "center" }}
-              onPress={() => navigation.navigate("Register")}
-            >
-              <Text>
-                Don't have an account?{""}
-                <Text style={styles.navigate}>Register</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <View style={styles.header}>
+                <Text style={styles.headerTitle}>Sign in</Text>
+              </View>
+
+              <View>
+                <Text style={styles.inputTitle}>Email address</Text>
+                <TextInput
+                  style={styles.input}
+                  textAlign={"center"}
+                  value={state.email}
+                  onFocus={() => {
+                    setIsShowKeyboard(true);
+                  }}
+                  onChangeText={(value) =>
+                    setState((prevState) => ({ ...prevState, email: value }))
+                  }
+                />
+              </View>
+              <View style={{ marginTop: 20 }}>
+                <Text style={styles.inputTitle}>Password</Text>
+                <TextInput
+                  style={styles.input}
+                  textAlign={"center"}
+                  value={state.password}
+                  secureTextEntry={true}
+                  onFocus={() => {
+                    setIsShowKeyboard(true);
+                  }}
+                  onChangeText={(value) =>
+                    setState((prevState) => ({ ...prevState, password: value }))
+                  }
+                />
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.btn}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.btnTitle}>Sign in</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={{ alignSelf: "center" }}
+                onPress={() => navigation.navigate("Register")}
+              >
+                <Text style={{ marginRight: 5, marginTop: 16 }}>
+                  Don't have an account?{""}
+                  <Text style={styles.navigate}>Register</Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
@@ -118,18 +118,24 @@ export default function LoginScreen({navigation}) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    display: "flex",
+    justifyContent: "flex-end",
     backgroundColor: "#fff",
   },
   image: {
-    flex: 1,
-    resizeMode: "cover",
-    justifyContent: "flex-end",
+    minHeight: "100%",
+    minWidth: "100%",
+    display: "flex",
     alignItems: "center",
+    justifyContent: "flex-end",
   },
   form: {
+    borderRadius: 26,
+    marginHorizontal: 20,
     backgroundColor: "#ffffff",
     padding: 16,
+    minHeight: "80%",
+    minWidth: "100%",
   },
   input: {
     borderWidth: 1,

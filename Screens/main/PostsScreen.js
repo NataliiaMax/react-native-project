@@ -1,4 +1,6 @@
 import { TouchableOpacity } from "react-native";
+import { useDispatch } from "react-redux";
+import { authSignOutUser } from "../../redux/auth/authOperations";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Octicons, AntDesign } from "@expo/vector-icons";
 
@@ -9,6 +11,10 @@ import MapScreen from "../nested/MapScreen";
 const NestedScreen = createNativeStackNavigator();
 
 export default function PostsScreen() {
+    const dispatch = useDispatch();
+    const signOut = () => {
+      dispatch(authSignOutUser());
+    };
   return (
     <NestedScreen.Navigator
       screenOptions={{
@@ -30,10 +36,11 @@ export default function PostsScreen() {
         options={{
           title: "The Publications",
           headerRight: () => (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={signOut} title="LogOut">
               <Octicons name="sign-out" size={24} color="#BDBDBD" />
             </TouchableOpacity>
           ),
+          headerLeft: null,
         }}
       />
       <NestedScreen.Screen

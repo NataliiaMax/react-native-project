@@ -8,15 +8,31 @@ import {
   FlatList,
 } from "react-native";
 import { Octicons, FontAwesome, AntDesign } from "@expo/vector-icons";
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  addDoc,
+} from "firebase/firestore";
+import { db } from "../../firebase/config";
 
 export default function DefaultPostsScreen({ navigation }) {
   const [posts, setPosts] = useState([]);
+  const [userLikes, setUserLikes] = useState("no");
+  const [likeCount, setLikeCount] = useState(0);
+
+  const getAllPosts = async () => {
+    const dbRef = collection(db, "posts");
+    onSnapshot(dbRef, (docSnap) =>
+      setPosts(docSnap.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+    );
+  };
+
   useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [...prevState, route.params]);
-    }
-  }, [route.params]);
-  
+    getAllPosts();
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -69,7 +85,7 @@ export default function DefaultPostsScreen({ navigation }) {
                   <TouchableOpacity
                     style={styles.postInfoBtn}
                     activeOpacity={0.7}
-                  >
+                         >
                     <AntDesign
                       name="like2"
                       size={24}

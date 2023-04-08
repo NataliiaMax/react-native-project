@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Camera, CameraType } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
-import { Octicons } from "@expo/vector-icons";
+import { Octicons, Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebase/config";
 
 import {
   Text,
@@ -19,7 +23,7 @@ import {
 const initialPostData = {
   photo: "",
   description: "",
-  location: "",
+  place: "",
 };
 
 export default function CreatePostsScreen({ navigation }) {
@@ -29,6 +33,8 @@ export default function CreatePostsScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [type, setType] = useState(CameraType.back);
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+
+  const { userId, name, email, avatar } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -54,7 +60,7 @@ export default function CreatePostsScreen({ navigation }) {
     Keyboard.dismiss();
   };
 
-    useEffect(() => {
+  useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -81,13 +87,15 @@ export default function CreatePostsScreen({ navigation }) {
     setImageToPostData(photo);
   };
 
-  const setImageToPostData = async (img) => {
+    const setImageToPostData = async (img) => {
     try {
       let location = await Location.getCurrentPositionAsync({});
+
       let coords = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
+
       let address = await Location.reverseGeocodeAsync(coords);
       let city = address[0].city;
       setPostData((prevState) => ({ ...prevState, photo: img.uri || img }));
@@ -116,7 +124,49 @@ export default function CreatePostsScreen({ navigation }) {
     navigation.navigate("DefaultPost");
     setPostData(initialPostData);
   };
-  
+
+  const uploadPhotoToServer = async () => {
+    const storage = getStorage();
+    const uniquePostId = Date.now().toString();
+    const storageRef = ref(storage, `images/${uniquePostId}`);
+
+    const response = await fetch(postData.photo);
+    const file = await response.blob();
+
+    await uploadBytes(storageRef, file).then(() => {
+      console.log(`photo is uploaded`);
+    });
+    const processedPhoto = await getDownloadURL(
+      ref(storage, `images/${uniquePostId}`)
+    )
+      .then((url) => {
+        return url;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return processedPhoto;
+  };
+
+  const uploadPostToServer = async () => {
+    const photo = await uploadPhotoToServer();
+    try {
+      const setUserPost = await addDoc(collection(db, "posts"), {
+        photo,
+        description: postData.description,
+        place: postData.place,
+        location: location.coords,
+        city,
+        userId,
+        name,
+        email,
+        avatar,
+      });
+    } catch (error) {
+      console.error("Error adding document: ", error);
+    }
+  };
+
   return (
     <TouchableWithoutFeedback onPress={keyboardHide}>
       <View style={styles.container}>
@@ -179,8 +229,8 @@ export default function CreatePostsScreen({ navigation }) {
               style={{ ...styles.input, paddingLeft: 28 }}
               placeholder="Select a location..."
               onFocus={() => setIsShowKeyboard(true)}
-              value={postData.location}
-              onChangeText={(value) => handleInput("location", value)}
+              value={postData.place}
+              onChangeText={(value) => handleInput("place", value)}
             />
             <Octicons
               name="location"
